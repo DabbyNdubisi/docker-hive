@@ -1,0 +1,32 @@
+version: '3.7'
+services:
+  mariadb:
+    image: mariadb
+    command: --default-authentication-plugin=mysql_native_password
+    volumes:
+      - ./sql-script.sql:/docker-entrypoint-initdb.d/sql-script.sql
+    environment:
+      MYSQL_ROOT_PASSWORD: password
+    ports:
+      - 3306:3306
+
+  adminer:
+    image: adminer
+    deploy:
+      restart_policy:
+        condition: on-failure    
+    ports:
+      - 8080:8080
+  
+  hive-metastore:
+    image: metastore:latest    
+    ports:
+      - 9083:9083 
+    depends_on:
+      - mariadb
+    volumes:
+      - /tmp:/tmp
+    deploy:
+      restart_policy:
+        condition: on-failure
+        delay: 5s
